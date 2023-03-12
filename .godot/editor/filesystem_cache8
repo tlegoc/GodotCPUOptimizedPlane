@@ -1,9 +1,0 @@
-2a60927148abd1d33b818b535e306557
-::res://::1678654947
-icon.svg::CompressedTexture2D::8184279253886000011::1678628696::1678628708::1::::<><>::
-node_3d.tscn::PackedScene::-1::1678654947::0::1::::<><>::
-::res://Scripts/::1678654947
-Camera.gd::GDScript::-1::1678633495::0::1::::FreeLookCamera<>Camera3D<>::
-Chunk.gd::GDScript::-1::1678642469::0::1::::<>MeshInstance3D<>::
-TessellatedPlane.gd::GDScript::-1::1678643958::0::1::::TessellatedPlane<>Node3D<>::
-::res://Shaders/::1678630988
