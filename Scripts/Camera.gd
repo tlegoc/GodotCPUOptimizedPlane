@@ -62,6 +62,12 @@ func _input(event):
 				_shift = event.pressed
 			KEY_ALT:
 				_alt = event.pressed
+			KEY_I:
+				get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
+			KEY_O:
+				get_viewport().debug_draw = Viewport.DEBUG_DRAW_DISABLED
+	
+	
 
 # Updates mouselook and movement every frame
 func _process(delta):

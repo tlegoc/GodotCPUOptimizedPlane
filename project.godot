@@ -14,3 +14,7 @@ config/name="ShaderTests"
 run/main_scene="res://node_3d.tscn"
 config/features=PackedStringArray("4.0", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/vsync/vsync_mode=0
