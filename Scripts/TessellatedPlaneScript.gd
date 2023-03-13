@@ -1,8 +1,9 @@
 class_name TessellatedPlane extends Node3D
 
+
 @export_category("Tessellation Properties")
 @export_range(.1, 50) var chunk_size: float = 16
-@export_range(0, 100, 1) var chunk_count: int = 1
+@export_range(1, 100, 1) var chunk_count: int = 10
 @export_range(1, 10, 1) var subdivisions: int = 9
 
 @export_category("Tessellation Rendering")
@@ -13,29 +14,38 @@ var meshes: Array[MultiMeshInstance3D]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
-	#$Mesh.mesh = generate(10, .2)
+	init_tessellated_plane()
+
+func clear_plane():
+	for child in get_children():
+		child.queue_free()
 	
+	plane = []
+	meshes = []
+
+func init_tessellated_plane():
+	clear_plane()
 	plane = []
 	meshes = []
 	
 	for sub in range(0, subdivisions):
-		plane.append(generate(pow(2, sub), chunk_size/pow(2, sub)))
+		plane.append(gen_plane(pow(2, sub), chunk_size/pow(2, sub)))
 		meshes.append(MultiMeshInstance3D.new())
 		add_child(meshes[sub])
 		meshes[sub].multimesh = MultiMesh.new()
 		meshes[sub].multimesh.instance_count = 0
 		meshes[sub].multimesh.mesh = plane[sub]
 		meshes[sub].multimesh.transform_format = MultiMesh.TRANSFORM_3D
-		meshes[sub].multimesh.instance_count = 1
-		meshes[sub].multimesh.set_instance_transform(0, Transform3D.IDENTITY)
 	
 	for i in range(0, chunk_count):
 		for j in range(0, chunk_count):
-			pass
+			var chunk := TessellatedPlaneChunk.new()
+			add_child(chunk)
+			chunk.position = Vector3(i * chunk_size, 0, j * chunk_size)
+			chunk.init_chunk()
 	
 
-func generate(cell_count: int, cell_size: float) -> ArrayMesh:
+func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for x in range(0, cell_count + 1):
@@ -57,6 +67,32 @@ func generate(cell_count: int, cell_size: float) -> ArrayMesh:
 	st.set_material(water_material)
 	return st.commit()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+# Mutex to avoid writing wrong transforms
+var mutex_request_chunk: Mutex = Mutex.new()
+func request_chunk(old_subdiv: int, old_index: int, new_subdiv: int, t: Transform3D) -> int:
+	mutex_request_chunk.lock()
+	# Save transforms as they get reset when instance_count changes
+	var transform_array := meshes[new_subdiv].multimesh.transform_array
+	
+	# Add another instance
+	meshes[new_subdiv].multimesh.instance_count += 1
+	
+	# Add 4 blank vectors to avoid errors
+	transform_array.append(Vector3.ZERO)
+	transform_array.append(Vector3.ZERO)
+	transform_array.append(Vector3.ZERO)
+	transform_array.append(Vector3.ZERO)
+	
+	# Put old transforms back into the multimesh
+	meshes[new_subdiv].multimesh.transform_array = transform_array
+	
+	# Add our transform
+	meshes[new_subdiv].multimesh.set_instance_transform(meshes[new_subdiv].multimesh.instance_count-1, t)
+	
+	# /!\ Unlock before return
+	mutex_request_chunk.unlock()
+	
+	return meshes[new_subdiv].multimesh.instance_count - 1
+
+func get_subdiv_count() -> int:
+	return subdivisions

@@ -1,10 +1,14 @@
-extends MeshInstance3D
+class_name TessellatedPlaneChunk extends Node3D 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
+var tp : TessellatedPlane
+var current_subdiv: int
+var current_index: int
 
+func init_chunk():
+	tp = get_parent()
+	var r := RandomNumberGenerator.new()
+	current_subdiv = 0
+	current_index = tp.request_chunk(-1, -1, current_subdiv, transform)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+func get_chunk_size_screen() -> float:
+	return .0
