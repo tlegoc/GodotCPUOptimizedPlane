@@ -11,6 +11,8 @@ class_name TessellatedPlane extends Node3D
 
 var plane: Array[ArrayMesh]
 var meshes: Array[MultiMeshInstance3D]
+var mutex_request_chunk: Mutex
+var chunks: Array[TessellatedPlaneChunk]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -25,6 +27,7 @@ func clear_plane():
 
 func init_tessellated_plane():
 	clear_plane()
+	mutex_request_chunk = Mutex.new()
 	plane = []
 	meshes = []
 	
@@ -40,9 +43,11 @@ func init_tessellated_plane():
 	for i in range(0, chunk_count):
 		for j in range(0, chunk_count):
 			var chunk := TessellatedPlaneChunk.new()
+			chunks.append(chunk)
 			add_child(chunk)
 			chunk.position = Vector3(i * chunk_size, 0, j * chunk_size)
 			chunk.init_chunk()
+	
 	
 
 func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
@@ -67,10 +72,30 @@ func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 	st.set_material(water_material)
 	return st.commit()
 
-# Mutex to avoid writing wrong transforms
-var mutex_request_chunk: Mutex = Mutex.new()
 func request_chunk(old_subdiv: int, old_index: int, new_subdiv: int, t: Transform3D) -> int:
 	mutex_request_chunk.lock()
+	
+	# First we remove the old plane
+	if old_subdiv != -1 && old_index != -1:
+		var old_multimesh: MultiMesh = meshes[old_subdiv].multimesh
+		if old_multimesh.instance_count > 1:
+			# We delete the old transform by overwriting it with the old one
+			var temp_tarray := old_multimesh.transform_array
+			old_multimesh.set_instance_transform(old_index, old_multimesh.get_instance_transform(old_multimesh.instance_count-1))
+			temp_tarray.resize(temp_tarray.size() - 4)
+			old_multimesh.instance_count -= 1
+			old_multimesh.transform_array = temp_tarray
+			
+			# This also means we need to warn the chunk that was moved to change
+			# it's old index.
+			for c in chunks:
+				if c.current_subdiv == old_subdiv && c.current_index == old_multimesh.instance_count:
+					c.current_index = old_index
+					break
+		else:
+			old_multimesh.instance_count = 0
+	
+	# Then we create a new plane for the chunk
 	# Save transforms as they get reset when instance_count changes
 	var transform_array := meshes[new_subdiv].multimesh.transform_array
 	
@@ -78,10 +103,7 @@ func request_chunk(old_subdiv: int, old_index: int, new_subdiv: int, t: Transfor
 	meshes[new_subdiv].multimesh.instance_count += 1
 	
 	# Add 4 blank vectors to avoid errors
-	transform_array.append(Vector3.ZERO)
-	transform_array.append(Vector3.ZERO)
-	transform_array.append(Vector3.ZERO)
-	transform_array.append(Vector3.ZERO)
+	transform_array.resize(transform_array.size() + 4)
 	
 	# Put old transforms back into the multimesh
 	meshes[new_subdiv].multimesh.transform_array = transform_array
@@ -96,3 +118,6 @@ func request_chunk(old_subdiv: int, old_index: int, new_subdiv: int, t: Transfor
 
 func get_subdiv_count() -> int:
 	return subdivisions
+	
+func get_chunk_size() -> float:
+	return chunk_size
