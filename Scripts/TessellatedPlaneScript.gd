@@ -3,33 +3,32 @@ class_name TessellatedPlane extends Node3D
 
 @export_category("Tessellation Properties")
 @export_range(.1, 50) var chunk_size: float = 16
-@export_range(1, 100, 1) var chunk_count: int = 10
-@export_range(1, 10, 1) var subdivisions: int = 9
+@export_range(1, 100, 1) var chunk_count: int = 50
+@export_range(1, 10, 1) var subdivisions: int = 8
 
 @export_category("Tessellation Rendering")
 @export var water_material: Material
 
 var plane: Array[ArrayMesh]
 var meshes: Array[MultiMeshInstance3D]
-var mutex_request_chunk: Mutex
-var chunks: Array[TessellatedPlaneChunk]
+var request_chunk_mutex: Mutex
+var chunks: Dictionary
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	init_tessellated_plane()
+	request_chunk_mutex = Mutex.new()
 
 func clear_plane():
 	for child in get_children():
 		child.queue_free()
 	
+	chunks = {}
 	plane = []
 	meshes = []
 
 func init_tessellated_plane():
 	clear_plane()
-	mutex_request_chunk = Mutex.new()
-	plane = []
-	meshes = []
 	
 	for sub in range(0, subdivisions):
 		plane.append(gen_plane(pow(2, sub), chunk_size/pow(2, sub)))
@@ -43,12 +42,11 @@ func init_tessellated_plane():
 	for i in range(0, chunk_count):
 		for j in range(0, chunk_count):
 			var chunk := TessellatedPlaneChunk.new()
-			chunks.append(chunk)
 			add_child(chunk)
+			chunk.name = str(i * j)
 			chunk.position = Vector3(i * chunk_size, 0, j * chunk_size)
 			chunk.init_chunk()
-	
-	
+			chunks[chunk.name] = [-1, -1]
 
 func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 	var st = SurfaceTool.new()
@@ -59,8 +57,8 @@ func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 	
 	st.deindex()
 	var vi: int = 0
-	for x in range(0, cell_count + 1):
-		for y in range (0, cell_count + 1):
+	for x in range(0, cell_count):
+		for y in range (0, cell_count):
 			st.add_index(vi)
 			st.add_index(vi + cell_count + 1)
 			st.add_index(vi + 1)
@@ -68,56 +66,42 @@ func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 			st.add_index(vi + cell_count + 1)
 			st.add_index(vi + cell_count + 2)
 			vi+=1
-			
+		vi+=1
 	st.set_material(water_material)
 	return st.commit()
 
-func request_chunk(old_subdiv: int, old_index: int, new_subdiv: int, t: Transform3D) -> int:
-	mutex_request_chunk.lock()
+func request_chunk(c: TessellatedPlaneChunk, new_subdiv: int, t: Transform3D):
+	var current = chunks[c.name]
+	if current[0] == new_subdiv:
+		return
 	
-	# First we remove the old plane
-	if old_subdiv != -1 && old_index != -1:
-		var old_multimesh: MultiMesh = meshes[old_subdiv].multimesh
-		if old_multimesh.instance_count > 1:
-			# We delete the old transform by overwriting it with the old one
-			var temp_tarray := old_multimesh.transform_array
-			old_multimesh.set_instance_transform(old_index, old_multimesh.get_instance_transform(old_multimesh.instance_count-1))
-			temp_tarray.resize(temp_tarray.size() - 4)
-			old_multimesh.instance_count -= 1
-			old_multimesh.transform_array = temp_tarray
-			
-			# This also means we need to warn the chunk that was moved to change
-			# it's old index.
-			for c in chunks:
-				if c.current_subdiv == old_subdiv && c.current_index == old_multimesh.instance_count:
-					c.current_index = old_index
-					break
-		else:
-			old_multimesh.instance_count = 0
+	request_chunk_mutex.lock()
+	# Removing the old div
+	if current[0] != -1 && current[1] != -1:
+		var mm = meshes[current[0]].multimesh
+		
+		mm.set_instance_transform(current[1], mm.get_instance_transform(mm.instance_count-1))
+		
+		chunks[chunks.find_key([current[0], mm.instance_count-1])][1] = current[1]
+		
+		var array = mm.transform_array
+		array.resize(array.size() - 4)
+		
+		mm.instance_count -= 1
+		mm.transform_array = array
 	
-	# Then we create a new plane for the chunk
-	# Save transforms as they get reset when instance_count changes
-	var transform_array := meshes[new_subdiv].multimesh.transform_array
+	var mm = meshes[new_subdiv].multimesh
 	
-	# Add another instance
-	meshes[new_subdiv].multimesh.instance_count += 1
+	var array = mm.transform_array
 	
-	# Add 4 blank vectors to avoid errors
-	transform_array.resize(transform_array.size() + 4)
+	array.resize(array.size() + 4)
 	
-	# Put old transforms back into the multimesh
-	meshes[new_subdiv].multimesh.transform_array = transform_array
+	mm.instance_count += 1
 	
-	# Add our transform
-	meshes[new_subdiv].multimesh.set_instance_transform(meshes[new_subdiv].multimesh.instance_count-1, t)
+	mm.transform_array = array
 	
-	# /!\ Unlock before return
-	mutex_request_chunk.unlock()
+	mm.set_instance_transform(mm.instance_count - 1, t)
 	
-	return meshes[new_subdiv].multimesh.instance_count - 1
-
-func get_subdiv_count() -> int:
-	return subdivisions
+	chunks[c.name] = [new_subdiv, mm.instance_count - 1]
 	
-func get_chunk_size() -> float:
-	return chunk_size
+	request_chunk_mutex.unlock()

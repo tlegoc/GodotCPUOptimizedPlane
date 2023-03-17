@@ -1,17 +1,12 @@
 class_name TessellatedPlaneChunk extends Node3D 
 
 var tp : TessellatedPlane
-var current_subdiv: int
-var current_index: int
 
 func init_chunk():
 	tp = get_parent()
-	var r := RandomNumberGenerator.new()
-	current_subdiv = 0
-	current_index = tp.request_chunk(-1, -1, current_subdiv, transform)
 
 func get_chunk_size_screen() -> float:
-	var chunk_size = tp.get_chunk_size()
+	var chunk_size = tp.chunk_size
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	var corner_top_left : Vector3 = position
 	var corner_top_right : Vector3 = position + Vector3(1, 0, 0) * chunk_size
@@ -47,17 +42,10 @@ func get_chunk_size_screen() -> float:
 	return area/(screen_size.x * screen_size.y)
 
 func _process(delta):
-	var chunk_screen_area : float = get_chunk_size_screen()
-	var new_subdiv: int
-	if chunk_screen_area > 0.4:
-		new_subdiv = 8
-	elif chunk_screen_area > 0.1:
-		new_subdiv = 6
-	else:
-		new_subdiv = 0
+	# var chunk_screen_area : float = get_chunk_size_screen()
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	var center : Vector3 = (position - Vector3.LEFT * tp.chunk_size/2.0 - Vector3.FORWARD * tp.chunk_size/2.0)
+	var distance: float = (center - camera.position).length()
+	var new_subdiv: int = clamp(100/distance, 0, tp.subdivisions - 1)
 	
-	if new_subdiv != current_subdiv:
-		current_index = tp.request_chunk(current_subdiv, current_index, new_subdiv, transform)
-		current_subdiv = new_subdiv
-	
-	
+	tp.request_chunk(self, new_subdiv, self.transform)
