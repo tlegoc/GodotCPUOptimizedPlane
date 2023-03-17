@@ -41,7 +41,7 @@ func init_tessellated_plane():
 	
 	for i in range(0, chunk_count):
 		for j in range(0, chunk_count):
-			var chunk := TessellatedPlaneChunk.new()
+			var chunk := TessellatedChunk.new()
 			add_child(chunk)
 			chunk.name = str(i * j)
 			chunk.position = Vector3(i * chunk_size, 0, j * chunk_size)
@@ -70,7 +70,7 @@ func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 	st.set_material(water_material)
 	return st.commit()
 
-func request_chunk(c: TessellatedPlaneChunk, new_subdiv: int, t: Transform3D):
+func request_chunk(c: TessellatedChunk, new_subdiv: int, t: Transform3D):
 	request_chunk_mutex.lock()
 	var current = chunks[c.name]
 	if current[0] == new_subdiv:

@@ -1,6 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://7r1wawbl3xa0"]
+[gd_scene load_steps=5 format=3 uid="uid://c7kgholsfp0o6"]
 
-[ext_resource type="Script" path="res://Scripts/TessellatedPlaneScript.gd" id="2_hq2dh"]
+[ext_resource type="Script" path="res://Scripts/TessellatedPlane.gd" id="2_3l5uk"]
 [ext_resource type="Script" path="res://Scripts/Camera.gd" id="2_l82i3"]
 [ext_resource type="Material" uid="uid://dobtl8mr7camj" path="res://Shaders/TestMat.tres" id="4_mkvyc"]
 
@@ -13,7 +13,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.619933, 0.664994, 0.883066)
 script = ExtResource("2_l82i3")
 
 [node name="TessellatedPlane" type="Node3D" parent="."]
-script = ExtResource("2_hq2dh")
+script = ExtResource("2_3l5uk")
 water_material = ExtResource("4_mkvyc")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

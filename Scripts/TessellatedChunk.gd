@@ -1,4 +1,4 @@
-class_name TessellatedPlaneChunk extends Node3D 
+class_name TessellatedChunk extends Node3D 
 
 var tp : TessellatedPlane
 
