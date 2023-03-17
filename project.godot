@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.0", "Forward Plus")
 run/max_fps=500
 config/icon="res://icon.svg"
 
+[debug]
+
+settings/stdout/print_fps=true
+
 [display]
 
 window/vsync/vsync_mode=0

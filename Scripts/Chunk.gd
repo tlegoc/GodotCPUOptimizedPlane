@@ -46,6 +46,6 @@ func _process(delta):
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	var center : Vector3 = (position - Vector3.LEFT * tp.chunk_size/2.0 - Vector3.FORWARD * tp.chunk_size/2.0)
 	var distance: float = (center - camera.position).length()
-	var new_subdiv: int = clamp(100/distance, 0, tp.subdivisions - 1)
+	var new_subdiv: int = clamp(80/distance*10, 0, tp.subdivisions - 1)
 	
 	tp.request_chunk(self, new_subdiv, self.transform)

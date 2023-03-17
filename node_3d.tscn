@@ -1,6 +1,5 @@
-[gd_scene load_steps=6 format=3 uid="uid://7r1wawbl3xa0"]
+[gd_scene load_steps=5 format=3 uid="uid://7r1wawbl3xa0"]
 
-[ext_resource type="Script" path="res://Scripts/DebugPrinter.gd" id="1_s42pn"]
 [ext_resource type="Script" path="res://Scripts/TessellatedPlaneScript.gd" id="2_hq2dh"]
 [ext_resource type="Script" path="res://Scripts/Camera.gd" id="2_l82i3"]
 [ext_resource type="Material" uid="uid://dobtl8mr7camj" path="res://Shaders/TestMat.tres" id="4_mkvyc"]
@@ -8,7 +7,6 @@
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_au3ui"]
 
 [node name="Node3D" type="Node3D"]
-script = ExtResource("1_s42pn")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.619933, 0.664994, 0.883066)
