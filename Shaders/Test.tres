@@ -1,4 +1,9 @@
-[gd_resource type="VisualShader" load_steps=13 format=3 uid="uid://b643s0gd58lbq"]
+[gd_resource type="VisualShader" load_steps=15 format=3 uid="uid://b643s0gd58lbq"]
+
+[sub_resource type="VisualShaderNodeColorConstant" id="VisualShaderNodeColorConstant_wqx6q"]
+constant = Color(0, 0, 1, 1)
+
+[sub_resource type="VisualShaderNodeColorConstant" id="VisualShaderNodeColorConstant_5ibpt"]
 
 [sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_16abp"]
 
@@ -96,6 +101,17 @@ void vertex() {
 
 
 }
+
+void fragment() {
+// ColorConstant:2
+	vec4 n_out2p0 = vec4(0.000000, 0.000000, 1.000000, 1.000000);
+
+
+// Output:0
+	ALBEDO = vec3(n_out2p0.xyz);
+
+
+}
 "
 graph_offset = Vector2(-373.456, 53.4207)
 nodes/vertex/2/node = SubResource("VisualShaderNodeInput_s2nsy")
@@ -123,3 +139,8 @@ nodes/vertex/15/position = Vector2(-660, 220)
 nodes/vertex/16/node = SubResource("VisualShaderNodeFloatOp_asdf1")
 nodes/vertex/16/position = Vector2(-500, 220)
 nodes/vertex/connections = PackedInt32Array(6, 0, 0, 0, 10, 0, 3, 1, 4, 0, 10, 0, 12, 0, 13, 0, 11, 0, 13, 1, 13, 0, 14, 0, 5, 0, 15, 0, 14, 0, 15, 1, 15, 0, 16, 0, 16, 0, 4, 0, 14, 2, 16, 1, 3, 0, 6, 0, 2, 0, 6, 2)
+nodes/fragment/2/node = SubResource("VisualShaderNodeColorConstant_wqx6q")
+nodes/fragment/2/position = Vector2(180, 220)
+nodes/fragment/connections = PackedInt32Array(2, 0, 0, 0)
+nodes/light/2/node = SubResource("VisualShaderNodeColorConstant_5ibpt")
+nodes/light/2/position = Vector2(40, 220)
