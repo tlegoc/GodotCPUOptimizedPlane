@@ -5,6 +5,7 @@ Small experiment with godot and tessellation. This project contains gdscript cod
 ![image](https://user-images.githubusercontent.com/21106616/225936238-142df0d4-873c-463d-9f42-dce5cc7d773a.png)
 
 ## Todo
+- Normals and UVs
 - Better selection of resolutions
 - Less visible seams between chunks
 - ability to offset chunks position 
