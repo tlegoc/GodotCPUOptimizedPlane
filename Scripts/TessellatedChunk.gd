@@ -43,9 +43,13 @@ func get_chunk_size_screen() -> float:
 
 func _process(delta):
 	# var chunk_screen_area : float = get_chunk_size_screen()
-	var camera: Camera3D = get_viewport().get_camera_3d()
-	var center : Vector3 = (position - Vector3.LEFT * tp.chunk_size/2.0 - Vector3.FORWARD * tp.chunk_size/2.0)
-	var distance: float = (center - camera.position).length()
-	var new_subdiv: int = clamp(80/distance*10, 0, tp.subdivisions - 1)
+	# Theses calculations are use to obtain the current subdivision.
+	# Unfortunately due to gdscript speed we can put them all in one line to avoid
+	# Creating vars, thus gaining .1MS on process time
+	#var camera: Camera3D = get_viewport().get_camera_3d()
+	#var center : Vector3 = (position - Vector3.LEFT * tp.chunk_size/2.0 - Vector3.FORWARD * tp.chunk_size/2.0)
+	#var distance: float = (center - camera.position).length()
+	#var new_subdiv: int = clamp(80/distance*10, 0, tp.subdivisions - 1)
 	
+	var new_subdiv: int = clamp(80/((position - Vector3.LEFT * tp.chunk_size/2.0 - Vector3.FORWARD * tp.chunk_size/2.0) - get_viewport().get_camera_3d().position).length()*10, 0, tp.subdivisions - 1)
 	tp.request_chunk(self, new_subdiv, self.transform)

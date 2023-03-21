@@ -4,20 +4,18 @@ class_name TessellatedPlane extends Node3D
 @export_category("Tessellation Properties")
 @export_range(.1, 50) var chunk_size: float = 80
 @export_range(1, 100, 1) var chunk_count: int = 50
-@export_range(1, 10, 1) var subdivisions: int = 11
+@export_range(1, 10, 1) var subdivisions: int = 10
 
 @export_category("Tessellation Rendering")
 @export var water_material: Material
 
 var plane: Array[ArrayMesh]
 var meshes: Array[MultiMeshInstance3D]
-var request_chunk_mutex: Mutex
 var chunks: Dictionary
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	init_tessellated_plane()
-	request_chunk_mutex = Mutex.new()
 
 func clear_plane():
 	for child in get_children():
@@ -71,7 +69,6 @@ func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 	return st.commit()
 
 func request_chunk(c: TessellatedChunk, new_subdiv: int, t: Transform3D):
-	request_chunk_mutex.lock()
 	var current = chunks[c.name]
 	if current[0] == new_subdiv:
 		return
@@ -103,6 +100,5 @@ func request_chunk(c: TessellatedChunk, new_subdiv: int, t: Transform3D):
 	mm.set_instance_transform(mm.instance_count - 1, t)
 	
 	chunks[c.name] = [new_subdiv, mm.instance_count - 1]
-	
-	request_chunk_mutex.unlock()
+
 
