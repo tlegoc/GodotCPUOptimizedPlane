@@ -1,10 +1,30 @@
-[gd_scene load_steps=5 format=3 uid="uid://c7kgholsfp0o6"]
+[gd_scene load_steps=9 format=3 uid="uid://c7kgholsfp0o6"]
 
 [ext_resource type="Script" path="res://Scripts/TessellatedPlane.gd" id="2_3l5uk"]
 [ext_resource type="Script" path="res://Scripts/Camera.gd" id="2_l82i3"]
-[ext_resource type="Material" uid="uid://dobtl8mr7camj" path="res://Shaders/TestMat.tres" id="4_mkvyc"]
+[ext_resource type="Material" uid="uid://b3hlr3mjcggsl" path="res://Shaders/Water.tres" id="4_nvhod"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_au3ui"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_hkw5g"]
+
+[sub_resource type="Sky" id="Sky_cf3e4"]
+sky_material = SubResource("PhysicalSkyMaterial_hkw5g")
+
+[sub_resource type="Environment" id="Environment_rwr8y"]
+background_mode = 2
+background_color = Color(0.415686, 0.666667, 0.729412, 1)
+sky = SubResource("Sky_cf3e4")
+ambient_light_source = 3
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+glow_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0077
+
+[sub_resource type="CameraAttributesPhysical" id="CameraAttributesPhysical_5wt8l"]
 
 [node name="Node3D" type="Node3D"]
 
@@ -14,12 +34,16 @@ script = ExtResource("2_l82i3")
 
 [node name="TessellatedPlane" type="Node3D" parent="."]
 script = ExtResource("2_3l5uk")
-water_material = ExtResource("4_mkvyc")
+water_material = ExtResource("4_nvhod")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.27418, 0)
 mesh = SubResource("CapsuleMesh_au3ui")
-surface_material_override/0 = ExtResource("4_mkvyc")
+surface_material_override/0 = ExtResource("4_nvhod")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_rwr8y")
+camera_attributes = SubResource("CameraAttributesPhysical_5wt8l")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.780179, 0.625556, 0, -0.625556, 0.780179, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.369909, 0.929068, 0, -0.929068, 0.369909, 0, 0, 0)
