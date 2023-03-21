@@ -66,6 +66,7 @@ func gen_plane(cell_count: int, cell_size: float) -> ArrayMesh:
 			vi+=1
 		vi+=1
 	st.set_material(water_material)
+	st.generate_normals()
 	return st.commit()
 
 func request_chunk(c: TessellatedChunk, new_subdiv: int, t: Transform3D):
