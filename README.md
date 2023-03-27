@@ -1,6 +1,8 @@
-# GodotWater
+# GodotCPUOptimizedPlane
 
 Small experiment with godot and tessellation. This project contains gdscript code to create optimized planes for use with large plane bodies such as oceans.
+
+Ideally this would be done on the GPU with tessellation but since godot doesn't support it you have to make an alternative using the CPU. 
 
 ![image](https://user-images.githubusercontent.com/21106616/225936238-142df0d4-873c-463d-9f42-dce5cc7d773a.png)
 
